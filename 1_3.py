@@ -16,7 +16,7 @@ The hex encoded string:
 
 from binascii import hexlify, unhexlify
 import sys
-import char_freq
+import freqy
 
 def xor_strings(xs, ys):
     """
@@ -61,6 +61,6 @@ for key in range(0, 256):
         pass
     else:
         #if is_english_phrase(unicode_string, english_words):
-        if char_freq.english_freq_match_score(unicode_string) > threshhold:
+        if freqy.english_freq_match_score(unicode_string) > threshhold:
             print('For key: {}'.format(xor_key))
             print(unicode_string)
