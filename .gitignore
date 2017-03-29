@@ -1,4 +1,6 @@
+.gitignore
 english-words/
 __pycache__/
 *.swp
 *.txt
+xor.py
