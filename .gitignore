@@ -1,0 +1,4 @@
+english-words/
+__pycache__/
+*.swp
+*.txt
