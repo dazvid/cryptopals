@@ -18,7 +18,6 @@ def score_xor(message, key):
     result = xor_strings(message, xorkey)
     if result: result = hexstr_to_str(result)
     if result:
-        #score = printable_percent(result)
         score = english_freq_match_score(result)
         return result, score
     return None, None
