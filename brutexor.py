@@ -2,19 +2,15 @@
 
 """
 brutexor.py
+
+XOR a string with a single byte XOR key, and then score it
+based on english character frequency.
 """
 
 from cryptostr import int_to_hexstr, xor_strings, hexstr_to_str
 from freqy import english_freq_match_score
-import string
 
-def printable_percent(s):
-    "Determine the percentage of printable characters in a given string"
-    printable = sum(1 for c in s if c in string.printable)
-    return printable / len(s) * 100
-
-
-def attempt_xor(message, key):
+def score_xor(message, key):
     "Attempt to brute force a single byte xor key"
     # generate a hex string key the same length as the encoded string
     keylen = int(len(message) / 2)

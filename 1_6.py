@@ -70,7 +70,7 @@ In particular: the "wokka wokka!!!" edit distance really is 37.
 from cryptostr import hamming_distance, bytes_to_hexstr, int_to_hexstr
 from binascii import a2b_base64
 from itertools import cycle, zip_longest
-from brutexor import attempt_xor
+from brutexor import score_xor
 import sys
 import string
 
@@ -79,9 +79,9 @@ import string
 #######################################
 
 NUM_MOST_FREQ_LETTERS = 5
-
-with open('6.txt') as infile:
-    encrypted = a2b_base64(infile.read())
+NUM_CHUNKS = 10
+MIN_KEYSIZE = 2
+MAX_KEYSIZE = 41
 
 #######################################
 # FUNCTIONS
@@ -94,23 +94,25 @@ def repeating_xor(message, key):
 # MAIN
 #######################################
 
+with open('6.txt') as infile:
+    encrypted = a2b_base64(infile.read())
+
 # Guess keysize by calculating hamming distance between groups of bytes
 best_guess_key = 0 
 lowest_distances = {}
-for keysize in range(2,41):
+for keysize in range(MIN_KEYSIZE, MAX_KEYSIZE):
     # take keysize amount of bytes and compare it to the second lot of 
     # keysize worth bytes
     chunks = []
-    num_chunks = 10
     start, end = 0, keysize
-    for _ in range(num_chunks):
+    for _ in range(NUM_CHUNKS):
         chunks.append(encrypted[start:end])
         start, end = end, end + keysize
 
     # find the hamming distance between them
     chunked_hexstr = [bytes_to_hexstr(s) for s in chunks]
     distances = []
-    for i in range(num_chunks - 1):
+    for i in range(NUM_CHUNKS - 1):
         distances.append(hamming_distance(chunked_hexstr[i], chunked_hexstr[i+1]))
 
     # normalise by dividing by keysize
@@ -121,10 +123,12 @@ for keysize in range(2,41):
 sorted_distances = list(lowest_distances.items())
 sorted_distances.sort(key=lambda index: index[1])
 sorted_distances = sorted_distances[:NUM_MOST_FREQ_LETTERS] 
+print('Keys with the lowest 5 hamming distances:')
 for key, freq in sorted_distances:
-    print('Lowest 5: The key is {} with a hamming distance of {}'.format(key, freq))
+    print('The key {} has a hamming distance of {}'.format(key, freq))
 
 keysize = int(sorted_distances[0][0])
+print('Attempting keysize of: {}'.format(keysize))
 
 # Break cipher text into blocks of keysize
 chunked_cipher = (encrypted[i:i + keysize] for i in range(0, len(encrypted), keysize))
@@ -137,7 +141,6 @@ transposed = (bytes(t) for t in zip_longest(*chunked_cipher, fillvalue=0))
 highest_score = 0
 blocks_best_keys = [dict() for _ in range(keysize)] 
 blocks_highest_score = []
-results = {}
 
 # Determine highest English char frequency for each block
 for block, message in enumerate(transposed):
@@ -145,8 +148,7 @@ for block, message in enumerate(transposed):
     hexstr = bytes_to_hexstr(message)
     # Brute force for single byte key
     for key in range(0, 256):
-        (result, score) = attempt_xor(hexstr, key)
-        #results = {block + score: result}
+        result, score = score_xor(hexstr, key)
         if score and score >= highest_score:
             short_key = int_to_hexstr(key)
             if score not in blocks_best_keys[block]:
@@ -159,19 +161,32 @@ for block, message in enumerate(transposed):
     # Reset score for next block
     highest_score = 0 
 
+# Now we have the higest scores and probable keys... Run through again to determine 
+# which of the keys have the best results
+chunked_cipher = (encrypted[i:i + keysize] for i in range(0, len(encrypted), keysize))
+transposed = (bytes(t) for t in zip_longest(*chunked_cipher, fillvalue=0))
 # Print out most likely keys, with some broken out text for manual analysis
-for block in range(keysize):
+finalkey = ''
+highest_char_count = 0
+for block, message in enumerate(transposed):
     print('------------------- {} -------------------'.format(block))
     print('Possible keys:')
     score = blocks_highest_score[block]
     for key in blocks_best_keys[block][score]:
         printable_key = chr(int(key, 16))
-        sample_text = "test"  
         if printable_key in string.ascii_letters or string.punctuation or string.whitespace:
-            print('({}) {}: {}'.format(score, printable_key, sample_text))
+            result, __ = score_xor(bytes_to_hexstr(message), ord(printable_key))
+            filtered_result = ''.join(c for c in result if c in string.ascii_lowercase)
+            if len(filtered_result) > highest_char_count:
+                highest_char_count = len(filtered_result)
+                best_key = printable_key
+            print('({}) {}: {}'.format(score, printable_key, filtered_result))
+    finalkey += best_key
+    highest_char_count = 0
 
-finalkey = 'Terminator X: Bring the noise'
+print('==========================================')
 print('Likely key: {}'.format(finalkey))
 print('Attempting to decrypt...')
+print('==========================================')
 message = encrypted.decode('utf-8')
 print(repeating_xor(message, finalkey))
