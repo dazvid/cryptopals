@@ -45,7 +45,8 @@ print('Original:\n{}'.format(stanza))
 print('Encrypting with key: {}'.format(key))
 
 encrypted = repeating_xor(stanza, key)
-print('Encrypted:\n{}'.format(hexstr(encrypted)))
+print('Encrypted:\n{}'.format(encrypted))
 
+print(type(encrypted))
 decrypted = repeating_xor(encrypted, key)
 print('Decrypted:\n{}'.format(decrypted))

@@ -101,14 +101,15 @@ def english_freq_match_score(message):
     """
     freq_order = get_freq_order(message)
     match_score = 0
-    # Find matches for top six
-    for common_letter in etaoin[:6]:
-        if common_letter in freq_order[:6]:
-            match_score += 1
-    # Find matches for least common six
-    for uncommon_letter in etaoin[-6:]:
-        if uncommon_letter in freq_order [-6:]:
-            match_score += 1
+    if freq_order is not None:
+        # Find matches for top six
+        for common_letter in etaoin[:6]:
+            if common_letter in freq_order[:6]:
+                match_score += 1
+        # Find matches for least common six
+        for uncommon_letter in etaoin[-6:]:
+            if uncommon_letter in freq_order [-6:]:
+                match_score += 1
 
     return match_score
 
