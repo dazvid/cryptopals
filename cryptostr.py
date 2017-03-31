@@ -14,13 +14,13 @@ Examples:
     1 -> '01', 255 -> 'ff', etc.
 
 - hexstr
-    "test" -> "74657374"
+    'test' -> '74657374'
 
 - bytes_to_hexstr:
-    b'' -> ''
+    b'test' -> '74657374'
 
 - hexstr_to_str:
-    "74657374" -> "test"  
+    '74657374' -> 'test'
     
 - hamming_distance:
     s1 = "this is a test" & s2 = "wokka wokka!!!" == 37
@@ -70,7 +70,8 @@ def xor_strings(xs, ys):
     """
     Take two strings, xs - an encrypted hex string and 
     ys - a single byte XOR key (also a hex string)
-    assumes the strings are passed as utf-8, and will return a hex string also as utf-8
+    assumes the strings are passed as utf-8, and will return a hex string 
+    also as utf-8
     """
     xor_byte_string = b''
     for x, y in zip(unhexlify(xs), unhexlify(ys)):
