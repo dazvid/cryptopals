@@ -101,8 +101,6 @@ with open('6.txt') as infile:
 best_guess_key = 0 
 lowest_distances = {}
 for keysize in range(MIN_KEYSIZE, MAX_KEYSIZE):
-    # take keysize amount of bytes and compare it to the second lot of 
-    # keysize worth bytes
     chunks = []
     start, end = 0, keysize
     for _ in range(NUM_CHUNKS):
@@ -113,7 +111,8 @@ for keysize in range(MIN_KEYSIZE, MAX_KEYSIZE):
     chunked_hexstr = [bytes_to_hexstr(s) for s in chunks]
     distances = []
     for i in range(NUM_CHUNKS - 1):
-        distances.append(hamming_distance(chunked_hexstr[i], chunked_hexstr[i+1]))
+        distances.append(hamming_distance(chunked_hexstr[i], 
+                                          chunked_hexstr[i+1]))
 
     # normalise by dividing by keysize
     normalised = [distance / keysize for distance in distances]
@@ -131,7 +130,8 @@ keysize = int(sorted_distances[0][0])
 print('Attempting keysize of: {}'.format(keysize))
 
 # Break cipher text into blocks of keysize
-chunked_cipher = (encrypted[i:i + keysize] for i in range(0, len(encrypted), keysize))
+chunked_cipher = (encrypted[i:i + keysize] for i in range(0, len(encrypted), 
+                                                          keysize))
 
 # Transpose each first byte to a new string, second byte to a second 
 # string.. etc.
@@ -148,7 +148,7 @@ for block, message in enumerate(transposed):
     hexstr = bytes_to_hexstr(message)
     # Brute force for single byte key
     for key in range(0, 256):
-        result, score = score_xor(hexstr, key)
+        _, score = score_xor(hexstr, key)
         if score and score >= highest_score:
             short_key = int_to_hexstr(key)
             if score not in blocks_best_keys[block]:
@@ -157,13 +157,14 @@ for block, message in enumerate(transposed):
                 blocks_best_keys[block][score].append(short_key)
             highest_score = score
             blocks_highest_score[block] = highest_score
-
     # Reset score for next block
     highest_score = 0 
 
-# Now we have the higest scores and probable keys... Run through again to determine 
-# which of the keys have the best results
-chunked_cipher = (encrypted[i:i + keysize] for i in range(0, len(encrypted), keysize))
+# Now we have the highest scores and probable keys... Run through again to 
+# determine which of the keys have the best results
+# Redo the generators:
+chunked_cipher = (encrypted[i:i + keysize] for i in range(0, len(encrypted), 
+                                                          keysize))
 transposed = (bytes(t) for t in zip_longest(*chunked_cipher, fillvalue=0))
 # Print out most likely keys, with some broken out text for manual analysis
 finalkey = ''
@@ -174,9 +175,11 @@ for block, message in enumerate(transposed):
     score = blocks_highest_score[block]
     for key in blocks_best_keys[block][score]:
         printable_key = chr(int(key, 16))
-        if printable_key in string.ascii_letters or string.punctuation or string.whitespace:
-            result, __ = score_xor(bytes_to_hexstr(message), ord(printable_key))
-            filtered_result = ''.join(c for c in result if c in string.ascii_lowercase)
+        if printable_key in string.ascii_letters or string.punctuation 
+                                                 or string.whitespace:
+            result, _ = score_xor(bytes_to_hexstr(message), ord(printable_key))
+            filtered_result = ''.join(c for c in result 
+                                      if c in string.ascii_lowercase)
             if len(filtered_result) > highest_char_count:
                 highest_char_count = len(filtered_result)
                 best_key = printable_key
