@@ -25,4 +25,21 @@ but we're having you get ECB working in code for a reason. You'll need
 it a lot later on, and not just for attacking ECB.
 """
 
+#######################################
+# IMPORTS
+#######################################
 
+from binascii import a2b_base64
+from Crypto.Cipher import AES
+
+#######################################
+# MAIN
+#######################################
+
+with open('7.txt') as infile:
+    encrypted = a2b_base64(infile.read())
+
+key = 'YELLOW SUBMARINE'
+encryptor = AES.new(key, AES.MODE_ECB)
+decrypted = encryptor.decrypt(encrypted)
+print(decrypted.decode('utf-8'))
