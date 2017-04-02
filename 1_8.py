@@ -19,7 +19,6 @@ the same 16 byte ciphertext.
 #######################################
 # IMPORTS
 #######################################
-from Crypto.Cipher import AES
 import re
 
 #######################################
@@ -50,7 +49,6 @@ encrypted_lines = [line.strip() for line in encrypted_lines]
 for line in encrypted_lines:
     for i in range(len(line)):
         result = repeater(line[i:])
-        if result:
-            if len(result) > 1:
+        if result and len(result) > 1:
                 print('Detected repeating chars: {}'.format(result))
                 print('For line: {}'.format(line))
