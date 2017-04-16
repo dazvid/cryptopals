@@ -175,7 +175,7 @@ for block, message in enumerate(transposed):
     score = blocks_highest_score[block]
     for key in blocks_best_keys[block][score]:
         printable_key = chr(int(key, 16))
-        if printable_key in string.ascii_letters or string.punctuation 
+        if printable_key in string.ascii_letters or string.punctuation \
                                                  or string.whitespace:
             result, _ = score_xor(bytes_to_hexstr(message), ord(printable_key))
             filtered_result = ''.join(c for c in result 
