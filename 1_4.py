@@ -52,7 +52,7 @@ with open("4.txt") as encoded_string_file:
 
 # Brute force each encoded hexstr 
 for hexstr in encoded_hexstr_set:
-    key_len = int(len(hexstr)/2)
+    key_len = len(hexstr) // 2
 
     # Brute force every byte 0 -> 255 (\x00 -> \xFF)
     for key in range(0, 256):

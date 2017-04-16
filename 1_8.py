@@ -19,17 +19,20 @@ the same 16 byte ciphertext.
 #######################################
 # IMPORTS
 #######################################
+
 import re
 
 #######################################
 # DEFINES
 #######################################
+
 BLOCK_SIZE = 16
 REPEATER = re.compile(r'(.+?)\1+$')
 
 #######################################
 # FUNCTIONS
 #######################################
+
 def repeater(s):
     "Find a repeating group of chars in a string"
     match = REPEATER.match(s)

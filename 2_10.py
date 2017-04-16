@@ -31,3 +31,37 @@ results. What's the point of even doing this stuff if you aren't going
 to learn from it?
 """
 
+#######################################
+# IMPORTS
+#######################################
+
+from cryptostr import bytes_to_hexstr, hexstr, xor_strings
+from binascii import a2b_base64
+from Crypto.Cipher import AES
+
+#######################################
+# FUNCTIONS
+#######################################
+def cbc_mode(encryptor, message, keylen, iv):
+    "Implement CBC mode"
+    # First block is IV ^ plain1
+    # then encrypted into cipher1
+    # Second block uses cipher1 ^ plain2
+    # Third block uses cipher 2 ^ plain3.. etc.
+    hexstr_iv = bytes_to_hexstr(iv)
+    start, end = 0, keylen
+    for block in range()
+
+#######################################
+# MAIN
+#######################################
+
+with open('10.txt') as infile:
+    encrypted = a2b_base64(infile.read())
+
+key = 'YELLOW SUBMARINE'
+keylen = len(key)
+iv = '\x00' * keylen
+encryptor = AES.new(key, AES.MODE_ECB)
+cbc_result = cbc_mode(encryptor, encrypted, keylen, iv)
+print(cbc_result)

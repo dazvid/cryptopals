@@ -26,12 +26,14 @@ bytes of padding to the end of the block. For instance,
 #######################################
 # IMPORTS
 #######################################
+
 from binascii import a2b_qp
 import sys
 
 #######################################
 # FUNCTIONS
 #######################################
+
 def pad_message(message, block_size):
     "Pad message to be block_size"
     fill = block_size - len(message)
@@ -43,6 +45,7 @@ def pad_message(message, block_size):
 #######################################
 # MAIN
 #######################################
+
 message = 'YELLOW SUBMARINE'
 block_size = 20
 padded = pad_message(message, block_size)
