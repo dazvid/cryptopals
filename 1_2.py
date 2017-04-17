@@ -21,10 +21,15 @@ If your function works properly, then when you feed it the string:
 
 """
 
-def xor_strings(xs, ys):
-    return ''.join(hex(int(x, 16) ^ int(y, 16))[2:] for x, y in zip(xs, ys))
+from hexstr import Hexstr
 
-hex_string1 = '1c0111001f010100061a024b53535009181c'
-hex_string2 = '686974207468652062756c6c277320657965'
+expected = '746865206b696420646f6e277420706c6179'
 
-print(xor_strings(hex_string1, hex_string2))
+hs1 = Hexstr('1c0111001f010100061a024b53535009181c')
+hs2 = Hexstr('686974207468652062756c6c277320657965')
+
+result = hs1 ^ hs2
+
+print('Expected: {}'.format(expected))
+print('Actual: {}'.format(result))
+print('Match: {}'.format(result.value == expected))
