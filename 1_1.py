@@ -12,12 +12,13 @@ The string:
     SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t
 """
 
-from binascii import unhexlify, b2a_base64
+from hexstr import Hexstr
 
-def hex_to_b64(s):
-    byte_string = unhexlify(s)
-    return b2a_base64(byte_string).decode('utf-8')
+expected = 'SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t'
 
-hex_string = '49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d'
+hs = Hexstr('49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d')
+result = hs.to_base64()
 
-print(hex_to_b64(hex_string))
+print('Expected result: {}'.format(expected))
+print('Actual result: {}'.format(result))
+print('Match: {}'.format(result == expected))

@@ -6,21 +6,30 @@ test_hexstr.py
 Unit tests for the class hexstr.
 """
 
-from hexstr import Hexstr, InvalidHexstr
+from hexstr import Hexstr, InvalidHexstrError
+from binascii import unhexlify
 import unittest
 
 
 class KnownValues(unittest.TestCase):
 
     valid_hexstrs = ('49276d20', '1234567890abcdef', 'aAbBcCdDeEfF', '0123')
-    invalid_hexstrs = ('49276d2', '1234abcg', 'AbCdEfGh', '01234')
+    valid_strs = ('49276d2', '1234abcg', 'AbCdEfGh', '01234', 'Steve')
     invalid_input = (1.5, True, False, None, [1, 2, 3], {'key': 123})
+    printable = (b'This should be OK', b'As is this', b'And maybe this?')
+    non_printable = (b'\x00', b'\x07', b'This \xff\xf3')
 
-    def test_instantiation_valid(self):
-        """Test a valid hexstr used for instantiation"""
+    def test_instantiation_valid_hexstrs(self):
+        """Test valid hexstrs used for instantiation"""
         for hs in self.valid_hexstrs:
             newhexstr = Hexstr(hs)
             self.assertEqual(newhexstr.value, hs)
+
+    def test_instantiation_valid_strs(self):
+        """Test valid strs used for instantiation"""
+        for valid_str in self.valid_strs:
+            newhexstr = Hexstr(valid_str)
+            self.assertEqual(newhexstr.bytestr.decode('utf-8'), valid_str)
 
     def test_instantiate_from_bytes(self):
         """Test a valid bytestr used for instantiation"""
@@ -36,10 +45,10 @@ class KnownValues(unittest.TestCase):
         result = Hexstr(valid_int)
         self.assertEqual(valid_hexstr, result.value)
 
-    def test_instantiation_invalid(self):
-        """Test an invalid hexstr used for instantiation"""
-        for hs in self.invalid_hexstrs:
-            self.assertRaises(InvalidHexstr, Hexstr, hs)
+    def test_instantiate_from_negative_int(self):
+        """Test an invalid int used for instantiation"""
+        invalid_int = -123
+        self.assertRaises(InvalidHexstrError, Hexstr, invalid_int)
 
     def test_instantiation_invalid_types(self):
         """Test for invalid types being passed in to class"""
@@ -73,6 +82,17 @@ class KnownValues(unittest.TestCase):
         hexstr2 = '686974207468652062756c6c277320657965'
         self.assertRaises(TypeError, hexstr1.__xor__, hexstr2)
 
+    def test_is_printable(self):
+        """Test that each byte in a printable Hexstr is printable"""
+        for value in self.printable:
+            hs = Hexstr(value)
+            self.assertTrue(hs.is_printable())
+
+    def test_is_not_printable(self):
+        """Test that each byte in a non-printable Hexstr is printable"""
+        for value in self.non_printable:
+            hs = Hexstr(value)
+            self.assertFalse(hs.is_printable())
 
 if __name__ == '__main__':
     unittest.main()
