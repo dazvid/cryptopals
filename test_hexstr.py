@@ -89,7 +89,7 @@ class KnownValues(unittest.TestCase):
             self.assertTrue(hs.is_printable())
 
     def test_is_not_printable(self):
-        """Test that each byte in a non-printable Hexstr is printable"""
+        """Test that each byte in a non-printable Hexstr is not printable"""
         for value in self.non_printable:
             hs = Hexstr(value)
             self.assertFalse(hs.is_printable())

@@ -28,6 +28,22 @@ class Hexstr():
 
     def __init__(self, value=None):
         """Initialize a Hexstr object from str, int or bytes."""
+        self.update(value)
+
+    def __repr__(self):
+        """Print out the hexstr value as a utf-8 string by default."""
+        return self.value
+
+    def validate_hexstr(self, hs):
+        """Validate the characters and length of a hexstr."""
+        if len(hs) % 2 != 0: 
+            return False
+
+        allowed = re.compile(r'[0-9a-f]', re.IGNORECASE)
+        return all(allowed.match(x) for x in hs)
+
+    def update(self, value):
+        """Update the Hexstr value and bytestr with a new hexstr."""
         if isinstance(value, str): 
             if self.validate_hexstr(value):
                 # Already a valid hexstr
@@ -50,18 +66,6 @@ class Hexstr():
             self.bytestr = unhexlify(self.value)
         else:
             raise TypeError(self.invalid_type_message)
-
-    def __repr__(self):
-        """Print out the hexstr value as a utf-8 string by default."""
-        return self.value
-
-    def validate_hexstr(self, hs):
-        """Validate the characters and length of a hexstr."""
-        if len(hs) % 2 != 0: 
-            return False
-
-        allowed = re.compile(r'[0-9a-f]', re.IGNORECASE)
-        return all(allowed.match(x) for x in hs)
 
     def to_base64(self):
         """Return a utf-8 encoded base64 representation of the hexstr."""

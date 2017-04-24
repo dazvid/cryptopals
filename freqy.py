@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 """
-char_freq.py
+freqy.py
 
 Calculates the frequency of ascii characters in a string, and compares it to
 the frequency of characters in an English sentence.
@@ -19,102 +19,79 @@ Math Explorer's Project, which produced a table after measuring 40,000 words.
 In English, the space is slightly more frequent than the top letter (e) and 
 the non-alphabetic characters (digits, punctuation, etc.) collectively occupy 
 the fourth position (having already included the space) between t and a.
+
+A simple way of testing two distributions can be found here:
+
+https://en.wikipedia.org/wiki/Chi-squared_test
 """
 
-english_letter_freq = {'e': 12.70,
-                       't': 9.06,
-                       'a': 8.17,
-                       'o': 7.51,
-                       'i': 6.97,
-                       'n': 6.75,
-                       's': 6.33,
-                       'h': 6.09,
-                       'r': 5.99,
-                       'd': 4.25,
-                       'l': 4.03,
-                       'c': 2.78,
-                       'u': 2.76,
-                       'm': 2.41,
-                       'w': 2.36,
-                       'f': 2.23,
-                       'g': 2.02,
-                       'y': 1.97,
-                       'p': 1.93,
-                       'b': 1.29,
-                       'v': 0.98,
-                       'k': 0.77,
-                       'j': 0.15,
-                       'x': 0.15,
-                       'q': 0.10,
-                       'z': 0.07}
+from collections import Counter
 
-etaoin = 'etaoinshrdlcumwfgypbvkjxqz'
-letters = 'abcdefghijklmnopqrstuvwxyz'
+expected_freq = {'e': 12.70,
+                 't': 9.06,
+                 'a': 8.17,
+                 'o': 7.51,
+                 'i': 6.97,
+                 'n': 6.75,
+                 's': 6.33,
+                 'h': 6.09,
+                 'r': 5.99,
+                 'd': 4.25,
+                 'l': 4.03,
+                 'c': 2.78,
+                 'u': 2.76,
+                 'm': 2.41,
+                 'w': 2.36,
+                 'f': 2.23,
+                 'g': 2.02,
+                 'y': 1.97,
+                 'p': 1.93,
+                 'b': 1.29,
+                 'v': 0.98,
+                 'k': 0.77,
+                 'j': 0.15,
+                 'x': 0.15,
+                 'q': 0.10,
+                 'z': 0.07,
+                 ' ': 19.7,}
 
-def get_letter_count(message):
-    """ Returns a dictionary with keys of single letters and values of 
-        the count on how many times they appear in the message parameter.
+def chi_squared(message):
+    """Calculate the Chi-Squared statistic value.
+    
+    If the two distributions are identical, the chi-squared statistic is 0.
+    If the two distributions are quite different, expect a higher number.
+
+    X^2(C,E) = sum of (Ci - Ei)^2 / Ei, where i = A -> Z
     """
-    letter_count = {letter:0 for letter in letters}
-    for letter in message.lower():
-        if letter in letters:
-            letter_count[letter] += 1
-    return letter_count
+    c = Counter(message.lower())
+    # Normalize the expected probabilities into counts
+    e = { k: v * len(message) for k, v in expected_freq.items() }
+    # penalise non ascii characters dramatically
+    penalty = int(max(e.values())) ** 3
+    # chi squared algo with penalty
+    return sum(((c[i] - e[i])**2 / e[i]) if i in e else penalty for i in c)
 
-def get_freq_order(message):
-    """ Returns a string of the alphabet letters arranged in order of 
-        most frequently occuring in the message parameter. 
-    """
-    # First, get a dictionary of each letter and its frequency count
-    letter_to_freq = get_letter_count(message)
-
-    # Second, make a dictionary of each frequency count to each letter(s) 
-    # with that frequency
-    freq_to_letter = {}
-    for letter in letters:
-        if letter_to_freq[letter] not in freq_to_letter:
-            freq_to_letter[letter_to_freq[letter]] = [letter]
-        else:
-            freq_to_letter[letter_to_freq[letter]].append(letter)
-
-    # Third, put each list of letter sin reverse "ETAOIN" order, and 
-    # then conver it to a string
-    for freq in freq_to_letter:
-        freq_to_letter[freq].sort(key=etaoin.find, reverse=True)
-        freq_to_letter[freq] = ''.join(freq_to_letter[freq])
-
-    # Fourth, convert the freq_to_letter dictionary to a list of tuple 
-    # pairs (key, value) then sort
-    freq_pairs = list(freq_to_letter.items())
-    freq_pairs.sort(key=lambda char: char[0], reverse=True)
-
-    # Fifth, now that the letters are ordered by frequency, extra all 
-    # the letters for final string
-    return ''.join(char for freq, char in freq_pairs)
-
-def english_freq_match_score(message):
-    """ Return the number of matches that the string in the message 
-        parameter has when its letter frequency is compared to English 
-        letter frequency. A "match" is how many of its six most frequency 
-        and six least frequent letters is among the six most frequent and 
-        six least frequent letters for English. 
-    """
-    freq_order = get_freq_order(message)
-    match_score = 0
-    if freq_order is not None:
-        # Find matches for top six
-        for common_letter in etaoin[:6]:
-            if common_letter in freq_order[:6]:
-                match_score += 1
-        # Find matches for least common six
-        for uncommon_letter in etaoin[-6:]:
-            if uncommon_letter in freq_order [-6:]:
-                match_score += 1
-
-    return match_score
 
 if __name__ == "__main__":
-    " Test the score of a random string "
-    test_string = """This is a random test string for the ages """
-    score = english_freq_match_score(test_string)
-    print('The score for message:\n{}\nis: {}'.format(test_string, score))
+    """Test the score of a random string."""
+    test_strings = [ b'\\pptvqx?R\\8l?svtz?~?opjq{?py?}~|pq',
+                     b'Q}}y{|u2_Q5a2~{yw2s2b}g|v2}t2psq}|',
+                     b'Vzz~|{r5XV2f5y|~p5t5ez`{q5zs5wtvz{',
+                     b'Txx|~yp7ZT0d7{~|r7v7gxbys7xq7uvtxy',
+                     b'Kggcafo(EK/{(dacm(i(xg}fl(gn(jikgf',
+                     b'Jffb`gn)DJ.z)e`bl)h)yf|gm)fo)khjfg',
+                     b'Hdd`bel+FH,x+gb`n+j+{d~eo+dm+ijhde',
+                     b'Nbbfdcj-@N*~-adfh-l-}bxci-bk-olnbc',
+                     b'Maaeg`i.CM)}.bgek.o.~a{`j.ah.loma`',
+                     b"Cooking MC's like a pound of bacon",
+                     b'Bnnjhof!LB&r!mhjd!`!qntoe!ng!c`bno',
+                     b'Ammikle"OA%q"nkig"c"rmwlf"md"`caml',
+                     b'@llhjmd#N@$p#ojhf#b#slvmg#le#ab`lm',
+                     b'Gkkomjc$IG#w$hmoa$e$tkqj`$kb$fegkj',
+                     b'Fjjnlkb%HF"v%iln`%d%ujpka%jc%gdfjk',
+                     b'Eiimoha&KE!u&jomc&g&vishb&i`&dgeih',
+                     b"Dhhlni`'JD t'knlb'f'whric'ha'efdhi",]
+
+    for test in test_strings:
+        result = chi_squared(test.decode('utf-8'))
+        print('{}: {}'.format(result, test))
