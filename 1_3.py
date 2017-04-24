@@ -21,7 +21,6 @@ the one with the best score.
 
 from freqy import chi_squared
 from hexstr import Hexstr
-import string
 
 def bruteforce_xor(message):
     """Brute force single byte xor decrypt.
