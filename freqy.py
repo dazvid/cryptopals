@@ -67,7 +67,7 @@ def chi_squared(message):
     # Normalize the expected probabilities into counts
     e = { k: v * len(message) for k, v in expected_freq.items() }
     # penalise non ascii characters dramatically
-    penalty = int(max(e.values())) ** 3
+    penalty = int(max(e.values())) ** 2
     # chi squared algo with penalty
     return sum(((c[i] - e[i])**2 / e[i]) if i in e else penalty for i in c)
 
