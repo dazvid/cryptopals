@@ -74,7 +74,7 @@ class Hexstr():
         """xor two hexstrings together, return a new Hexstr obj."""
         if not isinstance(other, Hexstr): 
             raise TypeError("Can't xor non Hexstr objects together")
-        return Hexstr(''.join(hex(x ^ y)[2:] for x, y in 
+        return Hexstr(''.join('{:02x}'.format(x ^ y) for x, y in 
                       zip(self.bytestr, other.bytestr)))
 
     def is_printable(self):

@@ -35,7 +35,7 @@ from it?
 # IMPORTS
 #######################################
 
-from cryptostr import bytes_to_hexstr, hexstr, xor_strings
+from hexstr import Hexstr
 from binascii import a2b_base64
 from Crypto.Cipher import AES
 
@@ -43,9 +43,9 @@ from Crypto.Cipher import AES
 # FUNCTIONS
 #######################################
 def cbc_mode_encrypt(aes_ecb_obj, plain, keylen, iv):
-    "Implement CBC mode encryption. plain and iv are byte strings"
-    hexstr_iv = bytes_to_hexstr(iv)
-    hexstr_plain = bytes_to_hexstr(plain)
+    """Implement CBC mode encryption. plain and iv are byte strings."""
+    hexstr_iv = Hexstr(iv)
+    hexstr_plain = Hexstr(plain)
     result = ''
     # Converting bytes to hexstr doubles the length of the string..
     start, end = 0, keylen * 2
@@ -61,12 +61,18 @@ def cbc_mode_encrypt(aes_ecb_obj, plain, keylen, iv):
     return result
 
 def cbc_mode_decrypt(aes_ecb_obj, message, keylen, iv):
-    "Implement CBC mode decryption. message and iv are byte strings"
-    hexstr_iv = bytes_to_hexstr(iv)
+    """Implement CBC mode decryption. message and iv are byte strings."""
     start, end = 0, keylen
+    prev_cipher = Hexstr(iv)
+    result = Hexstr('')
     for block in range(len(message) // keylen):
-        encrypted
+        cipher = Hexstr(message[start:end])
+        decrypted = Hexstr(aes_ecb_obj.decrypt(cipher.bytestr))
+        plain = decrypted ^ prev_cipher
+        result.update(result.value + plain.value)
+        prev_cipher = cipher
         start, end = end, end + keylen
+    return result
 
 
 #######################################
@@ -80,5 +86,5 @@ key = 'YELLOW SUBMARINE'
 keylen = len(key)
 iv = b'\x00' * keylen
 aes_ecb_obj = AES.new(key, AES.MODE_ECB)
-cbc_result = cbc_mode_encrypt(aes_ecb_obj, encrypted, keylen, iv)
-print(cbc_result)
+cbc_result = cbc_mode_decrypt(aes_ecb_obj, encrypted, keylen, iv)
+print(cbc_result.bytestr.decode())
