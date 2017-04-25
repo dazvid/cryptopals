@@ -3,7 +3,8 @@
 """
 Detect single-character XOR
 
-One of the 60-character strings in this file (4.txt) has been encrypted by single-character XOR.
+One of the 60-character strings in this file (4.txt) has been encrypted 
+by single-character XOR.
 
 Find it.
 
@@ -19,70 +20,28 @@ etc.
 # IMPORTS
 ##########################
 
-from binascii import hexlify, unhexlify, b2a_qp
-import sys
-
-
-##########################
-# FUNCTIONS
-##########################
-
-def xor_strings(xs, ys):
-    """XOR two hexstrings together.
-
-    Take two strings, xs - an encrypted hex string, ys - a single byte 
-    XOR key extended to the same length as xs (also a hex string) assumes 
-    the strings are passed as utf-8, and will return a hex string 
-    also as utf-8.
-    """
-    # I'm guessing this could be a one liner, but with all of the conversions
-    # it's much more readable to split it out like this..
-    xor_byte_string = b''
-    for x, y in zip(unhexlify(xs), unhexlify(ys)):
-        xor_byte_string += int(x ^ y).to_bytes(1, sys.byteorder)
-    return hexlify(xor_byte_string).decode()
-
-def is_english_word(word, wordset):
-    """Determine if a word is a known English word."""
-    return word.lower() in wordset
-
-def is_english_phrase(phrase, wordset):
-    """If string has more than 3 English words, probably decrypted properly."""
-    english_word_count = 0
-    threshhold = 3
-    for word in phrase.lower().split(' '):
-        if(is_english_word(word, wordset)):
-            english_word_count += 1
-    return english_word_count >= threshhold
-
+from hexstr import Hexstr, single_byte_xor
+from isenglish import IsEnglish
 
 ##########################
 # MAIN
 ##########################
 
-# Create a set of English words for later scoring
-with open("./english-words/words.txt") as word_file:
-    english_words = set(word.strip().lower() for word in word_file)
+# Instantiating the IsEnglish() class will read a dictionary from a file
+# and generate a wordset
+english_tester = IsEnglish()
 
 # Create a set of encoded hex strings
 with open("4.txt") as encoded_string_file:
-    encoded_hexstr_set = set(hexstr.strip() for hexstr in encoded_string_file)
+    encoded_hexstr_set = set(Hexstr(hs.strip()) for hs in encoded_string_file)
 
 # Brute force each encoded hexstr 
 for hexstr in encoded_hexstr_set:
-    key_len = len(hexstr) // 2
-
-    # Brute force every byte 0 -> 255 (\x00 -> \xFF)
-    for key in range(0, 256):
-        # generate a hex string 'key' the same length as the encoded string
-        xor_key = hexlify(chr(key).encode() * key_len).decode()
-        xor_result = xor_strings(hexstr, xor_key)
-        try:
-            unicode_string = unhexlify(xor_result).decode()
-        except UnicodeDecodeError:
-            pass
-        else:
-            if is_english_phrase(unicode_string, english_words):
+    for result, key in single_byte_xor(hexstr):
+        if result.is_printable():
+            decoded = result.bytestr.decode()
+            if english_tester.is_english_phrase(decoded):
                 print('For hexstr: {}'.format(hexstr))
-                print('with key: {}'.format(xor_key))
-                print(unicode_string)
+                print('with key: {}'.format(key.value))
+                print(decoded)
+                break

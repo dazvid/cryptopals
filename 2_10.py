@@ -42,26 +42,23 @@ from Crypto.Cipher import AES
 #######################################
 # FUNCTIONS
 #######################################
-def cbc_mode_encrypt(aes_ecb_obj, plain, keylen, iv):
-    """Implement CBC mode encryption. plain and iv are byte strings."""
-    hexstr_iv = Hexstr(iv)
-    hexstr_plain = Hexstr(plain)
-    result = ''
-    # Converting bytes to hexstr doubles the length of the string..
-    start, end = 0, keylen * 2
-    for block in range(len(hexstr_plain) // keylen // 2):
-        if block == 0:
-            cipher = hexstr_iv
-            continue
-        else:
-            xor_result = xor_strings(hexstr_plain[start:end], cipher)
-            cipher = aes_ecb_obj.encrypt(xor_result)
-            result += bytes_to_hexstr(cipher)
-            start, end = end, (end + (keylen * 2))
+
+def cbc_mode_encrypt(aes_ecb_obj, message, keylen, iv):
+    """Implement CBC mode encryption. Message and iv are byte strings."""
+    start, end = 0, keylen
+    prev_cipher = Hexstr(iv)
+    result = Hexstr('')
+    for block in range(len(message) // keylen):
+        plain = Hexstr(message[start:end])
+        xor_result = plain ^ prev_cipher
+        encrypted = Hexstr(aes_ecb_obj.encrypt(xor_result.bytestr))
+        result.update(result.value + encrypted.value)
+        prev_cipher = encrypted
+        start, end = end, end + keylen
     return result
 
 def cbc_mode_decrypt(aes_ecb_obj, message, keylen, iv):
-    """Implement CBC mode decryption. message and iv are byte strings."""
+    """Implement CBC mode decryption. Message and iv are byte strings."""
     start, end = 0, keylen
     prev_cipher = Hexstr(iv)
     result = Hexstr('')
@@ -79,12 +76,28 @@ def cbc_mode_decrypt(aes_ecb_obj, message, keylen, iv):
 # MAIN
 #######################################
 
-with open('10.txt') as infile:
-    encrypted = a2b_base64(infile.read())
+if __name__ == '__main__':
 
-key = 'YELLOW SUBMARINE'
-keylen = len(key)
-iv = b'\x00' * keylen
-aes_ecb_obj = AES.new(key, AES.MODE_ECB)
-cbc_result = cbc_mode_decrypt(aes_ecb_obj, encrypted, keylen, iv)
-print(cbc_result.bytestr.decode())
+    with open('10.txt') as infile:
+        encrypted = a2b_base64(infile.read())
+
+    key = 'YELLOW SUBMARINE'
+    keylen = len(key)
+    iv = b'\x00' * keylen
+    aes_ecb_obj = AES.new(key, AES.MODE_ECB)
+
+    print('Decrypting... {} bytes'.format(len(encrypted)))
+    print('--------------------------------')
+    result = cbc_mode_decrypt(aes_ecb_obj, encrypted, keylen, iv)
+    decrypted = result.bytestr.decode('utf-8')
+    print(decrypted)
+
+    print('Custom encrypting... {} bytes'.format(len(decrypted)))
+    print('--------------------------------')
+    encrypted = cbc_mode_encrypt(aes_ecb_obj, decrypted, keylen, iv)
+    print(encrypted.value)
+
+    print('Decrypting... {} bytes'.format(len(encrypted.bytestr)))
+    print('--------------------------------')
+    decrypted = cbc_mode_decrypt(aes_ecb_obj, encrypted.bytestr, keylen, iv)
+    print(decrypted.bytestr.decode('utf-8'))

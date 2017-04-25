@@ -19,36 +19,22 @@ Character frequency is a good metric. Evaluate each output and choose
 the one with the best score. 
 """
 
-from freqy import chi_squared
-from hexstr import Hexstr
-
-def bruteforce_xor(message):
-    """Brute force single byte xor decrypt.
-    
-    Message is passed as a Hexstr object. Return a list of results,
-    and their accompanying Chi Squared Statistic value.
-    """
-    results = []
-    for i in range(256):
-        # Generate an approrpiate Hexstr key
-        xorkey = Hexstr(i)
-        xorkey.update(xorkey.value * (len(message.value) // 2))
-        result = message ^ xorkey
-        if result.is_printable():
-            score = chi_squared(result.value)
-            results.append((result, score, i))
-    return results
-
+from hexstr import Hexstr, single_byte_xor
+from isenglish import IsEnglish
 
 if __name__ == "__main__":
+
+    english_tester = IsEnglish()
 
     message = \
     '1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736'
 
     hs = Hexstr(message)
-    all_guesses = bruteforce_xor(hs)
-    # grab the top 5 results
-    best_guesses = sorted(all_guesses, key=lambda score: score[1])[:5]
-    for guess in best_guesses:
-        str_repr = guess[0].bytestr.decode() 
-        print('(0x{:x}) {:.2f}: {}'.format(guess[2], guess[1], str_repr))
+    for result, key in single_byte_xor(hs):
+        if result.is_printable():
+            decoded = result.bytestr.decode()
+            if english_tester.is_english_phrase(decoded):
+                # Only need the first byte of the key..
+                key = key.value[:2]
+                print('(0x{}): {}'.format(key, decoded))
+                break

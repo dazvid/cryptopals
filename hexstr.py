@@ -85,6 +85,18 @@ class Hexstr():
         """
         return all(chr(x) in string.printable for x in self.bytestr)
 
+def single_byte_xor(hs):
+    """Generator to brute force single byte keys for a given hexstr.
+    
+    Message is passed as a Hexstr object. Return a result for the 
+    attempted XOR decrypt and the associated key.
+    """
+    for i in range(256):
+        key = Hexstr(i)
+        key.update(key.value * (len(hs.value) // 2))
+        result = hs ^ key
+        yield result, key
+
 
 if __name__ == '__main__':
     pass

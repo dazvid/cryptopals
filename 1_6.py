@@ -67,10 +67,9 @@ In particular: the "wokka wokka!!!" edit distance really is 37.
 # IMPORTS
 #######################################
 
-from cryptostr import hamming_distance, bytes_to_hexstr, int_to_hexstr
+from cryptostr import hamming_distance, repeating_xor
 from binascii import a2b_base64
-from itertools import cycle, zip_longest
-from brutexor import score_xor
+from itertools import zip_longest
 import sys
 import string
 
@@ -82,13 +81,6 @@ NUM_MOST_FREQ_LETTERS = 5
 NUM_CHUNKS = 10
 MIN_KEYSIZE = 2
 MAX_KEYSIZE = 41
-
-#######################################
-# FUNCTIONS
-#######################################
-
-def repeating_xor(message, key):
-    return ''.join(chr(ord(c) ^ ord(k)) for c, k in zip(message, cycle(key)))
 
 #######################################
 # MAIN

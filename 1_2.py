@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 
 """
-Set 1 Challenge 2
+1_2.py
 
 Fixed XOR
 
-Write a function that takes two equal-length buffers and produces their XOR combination.
+Write a function that takes two equal-length buffers and produces their 
+XOR combination.
 
 If your function works properly, then when you feed it the string:
 
@@ -18,7 +19,6 @@ If your function works properly, then when you feed it the string:
     ... should produce:
 
     746865206b696420646f6e277420706c6179
-
 """
 
 from hexstr import Hexstr
